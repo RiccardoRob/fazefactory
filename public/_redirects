@@ -1,0 +1,4 @@
+# Cloudflare redirects for static paths (same host only).
+# www -> apex is NOT done here: use Dashboard > fazefactory.com > Rules > Redirect Rules >
+# template "Redirect from WWW to root". HTTP -> HTTPS: SSL/TLS > Edge Certificates > Always Use HTTPS.
+/index  /  301

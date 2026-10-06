@@ -1,0 +1,105 @@
+{
+  "interval": 4.236,
+  "fade": 0.618,
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "label": "Revamping · Heave-ho!",
+      "headline": [
+        "Back in",
+        "shape."
+      ]
+    },
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "label": "Rinnovamento · Oh issa!",
+      "headline": [
+        "Torniamo",
+        "in forma."
+      ]
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "label": "Renovación · ¡Arriba!",
+      "headline": [
+        "Volvemos",
+        "en forma."
+      ]
+    },
+    {
+      "lang": "fr",
+      "name": "Français",
+      "label": "Refonte · Allez, hop !",
+      "headline": [
+        "De retour",
+        "en forme."
+      ]
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "label": "Relaunch · Hau ruck!",
+      "headline": [
+        "Wieder",
+        "in Form."
+      ]
+    },
+    {
+      "lang": "nl",
+      "name": "Nederlands",
+      "label": "Vernieuwing · Hup!",
+      "headline": [
+        "Weer in",
+        "vorm."
+      ]
+    },
+    {
+      "lang": "fi",
+      "name": "Suomi",
+      "label": "Uudistus · Hiio hoi!",
+      "headline": [
+        "Takaisin",
+        "kuntoon."
+      ]
+    },
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "label": "Обновление · Раз-два, взяли!",
+      "headline": [
+        "Снова",
+        "в форме."
+      ]
+    },
+    {
+      "lang": "zh",
+      "name": "中文",
+      "label": "焕新 · 加油！",
+      "headline": [
+        "重新",
+        "塑形。"
+      ]
+    },
+    {
+      "lang": "ko",
+      "name": "한국어",
+      "label": "리뉴얼 · 영차!",
+      "headline": [
+        "제 모습",
+        "되찾는 중."
+      ]
+    },
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "label": "リニューアル · よいしょ！",
+      "headline": [
+        "カタチ、",
+        "取り戻し中。"
+      ]
+    }
+  ]
+}

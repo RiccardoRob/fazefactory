@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local secrets (never committed). In production: npx wrangler secret put NAME
+# DEEPL_API_KEY=
+# TURNSTILE_SECRET=
+# MAIL_API_KEY=

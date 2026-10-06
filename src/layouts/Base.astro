@@ -1,0 +1,32 @@
+---
+// Shared <head> for every page: charset, viewport, fonts, PWA, favicon.
+import '../styles/global.css';
+
+interface Props { title?: string; description?: string; lang?: string }
+const {
+  title = 'Digital Creative Service | Fazefactory®',
+  description = 'Fazefactory®, digital creative service. Est. 2014, Italy. The new site is shaping up.',
+  lang = 'en'
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonical}>
+  <meta name="theme-color" content="#3A1418">
+  <link rel="manifest" href="/manifest.json">
+  <link id="fav" rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500&display=swap">
+  <script src="/registerServiceWorker.js" defer is:inline></script>
+</head>
+<body>
+  <slot />
+</body>
+</html>

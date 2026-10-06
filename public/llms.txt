@@ -1,0 +1,14 @@
+# Fazefactory®
+
+> Fazefactory® is a digital creative service, established in 2014 in Italy. The website at fazefactory.com is being revamped: the current page is a temporary home with the Fazefactory star, while the new site takes shape.
+
+The page is a single interactive screen: the Fazefactory star moves through the red, yellow and blue primaries and can be poked, held, dragged and thrown. A headline rotates through eleven languages on the theme of "back in shape".
+
+## Contact
+
+- [Email](mailto:info@fazefactory.com?subject=Richiesta%20informazioni%20/%20Information%20request%20%E2%80%93%20fazefactory.com): information requests, in Italian or English
+
+## Site
+
+- [Home](https://fazefactory.com/): the current revamping page
+- [Headline translations](https://fazefactory.com/i18n.json): the multilingual texts shown on the page

@@ -1,0 +1,26 @@
+# Cloudflare headers (replaces the .htaccess security + cache rules).
+# Applies to everything served from dist/ (all prerendered pages and files).
+# Responses produced by the Worker itself (on-demand routes, later) set their headers in code / middleware.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  X-Frame-Options: DENY
+# When everything is stable on HTTPS, uncomment (hard to undo once browsers have it):
+#  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# Astro's bundled files carry a content hash in the name: cache forever
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  Cache-Control: public, max-age=2592000
+
+/i18n.json
+  Cache-Control: public, max-age=3600
+
+/serviceWorker.js
+  Cache-Control: no-cache

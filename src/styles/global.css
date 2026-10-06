@@ -1,0 +1,20 @@
+/* Tailwind v4. Theme + utilities only, no Preflight (Tailwind's CSS reset): the revamping page
+   has its own hand-tuned base styles and the reset would shift them (svg display:block, h1 sizes...).
+   For new sections built with Tailwind from scratch, swap these two lines for:  @import "tailwindcss";  */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* the star's engine is plain JS: don't scan it for class names */
+@source not "../scripts";
+
+/* The brand as Tailwind tokens: usable as bg-ink, text-mute, font-archivo, p-u (8px) ... */
+@theme {
+  --color-ink: #FAFAF7;
+  --color-mute: rgb(250 250 247 / .62);
+  --color-ground: #2A1A10;
+  --color-wine: #3A1418;
+  --color-ryb-red: #E3242B;
+  --color-ryb-yellow: #F6C700;
+  --font-archivo: "Archivo", system-ui, sans-serif;
+  --spacing-u: 8px;
+}

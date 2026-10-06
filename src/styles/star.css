@@ -1,0 +1,73 @@
+:root{--ink:#FAFAF7;--mute:rgba(250,250,247,.62);--rule:rgba(250,250,247,.18);--bg1:#3A1418;--bg2:#2A1A10;--bga:315deg;--g:clamp(16px,2.4vw,32px);--u:8px;color-scheme:dark}
+html,body{height:100%}
+/* the ground is a tiny canvas stretched to full screen: a smooth gradient survives the upscale,
+   and repainting 48×48 pixels is far cheaper than repainting the whole page */
+/* 3D ground: a perspective scene that pans against the pointer. The colour field sits deepest, the Swiss
+   grid floats in front of it; with preserve-3d the far layer moves less than the near one (parallax).
+   Each layer is scaled up by (perspective + depth) / perspective so it still fills the screen, plus a margin
+   for the pan. Only the scene's transform changes per frame, so the work stays on the compositor. */
+#sc{position:fixed;inset:0;z-index:-2;perspective:900px;overflow:hidden;pointer-events:none;background:#2A1A10}
+#sn{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+#bg{position:absolute;inset:0;width:100%;height:100%;transform:translateZ(-1500px) scale(3.6)}
+#gd{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform:translateZ(-450px) scale(2.1)}
+#gdp{fill:none;stroke:rgba(255,255,255,.07);stroke-width:1;vector-effect:non-scaling-stroke}
+/* waves the star emits: outline copies of the mark, in its own gradient, on a layer behind it */
+/* the typed line uses the face's own spacing and kerning pairs, untouched */
+#ty{position:fixed;left:0;top:0;transform-origin:0 0;--cap:.72;color:#fff;font-weight:500;line-height:1;letter-spacing:0;font-kerning:normal;font-feature-settings:'kern' 1,'liga' 1;text-rendering:optimizeLegibility;white-space:pre;pointer-events:none;will-change:transform}
+/* caret: a thin white bar after the last letter, blinking only while you type */
+/* caret: a touch taller than the capitals (+12%), centred on them, rounded ends, set a little off the last letter */
+#cr{display:inline-block;width:.068em;height:calc(var(--cap)*1.12em);margin-left:.11em;border-radius:.034em;background:#fff;vertical-align:calc(var(--cap)*-.06em);opacity:0}
+#ty.on #cr{animation:blink 1.06s steps(1) infinite}
+@keyframes blink{0%{opacity:1}50%{opacity:0}}
+#tr{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;contain:strict}
+#tr g{fill:none;stroke:url(#lg);stroke-width:1.2;opacity:0}
+body{background:#2A1A10;color:var(--ink);font:500 13px/1.35 Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden}
+main{height:100%;box-sizing:border-box;padding:var(--g);display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:auto 1fr auto auto auto;column-gap:var(--g)}
+/* bottom-left column on an 8 px baseline: label, headline, indicators, footer — 1u and 3u steps */
+.ft{grid-area:5/1/6/13;margin-top:calc(var(--u)*3);color:#fff}
+.ft span{text-transform:none}
+/* the four corners: each pair shares a row and sits on that row's vertical centre */
+.tl{grid-area:1/1/2/7;display:flex;align-items:center;gap:12px;align-self:center}
+.tr{grid-area:1/7/2/13;display:flex;align-items:center;justify-content:flex-end;gap:16px;align-self:center}
+.bl{grid-area:3/1/4/8}
+.br{grid-area:4/1/5/8;margin-top:calc(var(--u)*3)}
+.mark{grid-area:2/1/3/13;display:grid;place-items:center;min-height:0}
+#m{width:min(52vmin,440px);overflow:visible;cursor:grab;touch-action:none;transform-origin:50% 50%;will-change:transform;-webkit-user-select:none;user-select:none}
+.grab,.grab #m{cursor:grabbing;user-select:none}
+#b{transform-origin:50% 50%;width:60px;flex:none;fill:#fff;cursor:pointer;outline:0;overflow:visible}
+#b:focus-visible{filter:drop-shadow(0 0 3px var(--ink))}
+.bt{overflow:hidden;line-height:1.25}
+.bt>*{transform:translateX(-110%);opacity:0;transition:transform 1.618s cubic-bezier(.16,1,.3,1),opacity 1s}
+.bt>.l{transition-delay:.236s}
+#b:hover+.bt>*,#b:focus-visible+.bt>*,.open .bt>*{transform:none;opacity:1}
+/* one font, one text style: small caps-height labels; white for primary, muted for secondary */
+.t{font-size:12px;font-weight:500;line-height:1.4;text-transform:uppercase;letter-spacing:.08em}
+.l{color:var(--mute)}
+.t sup{font-size:.62em;letter-spacing:0}
+.ct{width:44px;height:44px;display:grid;place-items:center;color:#fff;transition:transform .382s;flex:none;outline:0}
+.ct:hover,.ct:focus-visible{transform:translateY(-2px)}
+.ct:focus-visible svg{filter:drop-shadow(0 0 3px #fff)}
+.ct svg{width:30px;height:30px;fill:currentColor}
+h1{margin:var(--u) 0 0;font-size:clamp(28px,4.4vw,56px);font-weight:500;line-height:1;letter-spacing:-.03em;min-height:2em;transition:opacity var(--fd,.618s) cubic-bezier(.4,0,.2,1)}
+/* scripts Archivo doesn't cover fall back to each system's own well-made face */
+#hb:lang(ru) h1{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif}
+#hb:lang(zh) h1{font-family:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;letter-spacing:0}
+#hb:lang(ja) h1{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;letter-spacing:0}
+#hb:lang(ko) h1{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;letter-spacing:-.01em}
+#lb{transition:opacity var(--fd,.618s) cubic-bezier(.4,0,.2,1)}
+.out #hl,.out #lb{opacity:0}
+.br{display:flex;gap:var(--u);justify-content:flex-start;align-items:center}
+.sw{width:32px;height:32px;border-radius:50%;flex:none}
+#ring{width:32px;height:32px;flex:none;overflow:visible}
+/* three concentric rings, all clockwise from 12 o'clock:
+   outer  = the whole colour cycle (φ⁵ s); it closes, then starts again
+   middle = the current hand-over between two primaries (one third of the cycle)
+   inner  = the current motion: a faint arc for its length, a white arc for the time spent */
+#cy,#tx,#len,#arc{fill:none;stroke-linecap:round;stroke-dasharray:0 1}
+#cy{stroke:url(#rg);stroke-width:5}
+#tx{stroke-width:3.4}
+#len{stroke:rgba(255,255,255,.2);stroke-width:4.6;transition:stroke-dasharray .618s cubic-bezier(.16,1,.3,1),opacity .382s}
+#len.rest{opacity:.4}
+#arc{stroke:#fff;stroke-width:4.6}
+@media (max-width:640px){.tr{grid-column:7/13}.bl,.br{grid-column:1/13}#m{width:72vmin}}
+@media (prefers-reduced-motion:reduce){.bt>*{transition:none}}

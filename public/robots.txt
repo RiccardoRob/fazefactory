@@ -1,0 +1,10 @@
+# Fazefactory® — https://fazefactory.com
+# Everything is open to search engines and AI crawlers.
+# A short description of the site for language models is at /llms.txt
+
+User-agent: *
+Allow: /
+
+# Technical files with no content of their own
+Disallow: /serviceWorker.js
+Disallow: /registerServiceWorker.js
