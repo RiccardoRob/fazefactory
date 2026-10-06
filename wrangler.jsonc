@@ -5,18 +5,13 @@
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    // directory: set by the Astro adapter at build time (dist/client)
     "binding": "ASSETS",
-    // /about.html -> /about, /index -> / (same job the .htaccess rewrites did)
     "html_handling": "drop-trailing-slash",
     "not_found_handling": "404-page"
   },
   "observability": { "enabled": true },
-  // Custom domain: the Worker answers on fazefactory.com directly (the zone must be on Cloudflare).
-  // Remove this block for the first deploy if the domain isn't on Cloudflare yet: you'll get *.workers.dev.
-  "routes": [
-    { "pattern": "fazefactory.com", "custom_domain": true }
-  ]
-  // Non-secret settings go in "vars"; secrets (DeepL key, mail key, Turnstile) with `npx wrangler secret put NAME`
-  // "vars": { "CONTACT_TO": "info@fazefactory.com" }
+  // Until fazefactory.com is on Cloudflare the site answers on *.workers.dev.
+  // When the domain is added: "workers_dev": false and
+  // "routes": [{ "pattern": "fazefactory.com", "custom_domain": true }]
+  "workers_dev": true
 }

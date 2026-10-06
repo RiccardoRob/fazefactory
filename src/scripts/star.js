@@ -52,10 +52,37 @@ addEventListener('resize',field);
    The scene pans the opposite way to the pointer: wider and quicker across (horizontal), shorter and slower
    up and down (vertical), in the ratio φ. It follows on a spring whose damping ratio is Ω_Λ = 0.685, the dark
    energy share of the universe (Planck 2018): just under critical, so it glides, overshoots a hair and settles. */
-const SN=$('sn'),GP=$('gdp'),PN={x:0,y:0,vx:0,vy:0,tx:0,ty:0},ZL=.685,WX=2.6,WY=2.6/F;
-function grid(){const W=innerWidth,H=innerHeight,s=W/12;let d='';                // the 12 Swiss columns, square cells
- for(let x=-W;x<=2*W;x+=s)d+=`M${x|0} ${-H}V${2*H}`;for(let y=H/2%s-H;y<=2*H;y+=s)d+=`M${-W} ${y|0}H${2*W}`;GP.setAttribute('d',d)}
-grid();addEventListener('resize',grid);
+const SN=$('sn'),PN={x:0,y:0,vx:0,vy:0,tx:0,ty:0},ZL=.685,WX=2.6,WY=2.6/F;
+
+/* ---- the sphere ----
+   We stand inside a sphere, set back from its centre by φ⁻¹ of its radius, with a wide lens (focal φ⁻² of the screen), so the far wall bends round
+   the star like a dome and sits well behind it. Its grid is a globe's: 24 meridians and 11 parallels,
+   one every 15°, so the half we face shows the page's 12 columns. Lines fade with distance (the far
+   wall is the faintest) and the globe turns slowly on its axis, once every φ¹⁰ s (about 2 minutes).
+   The pointer turns it too, on the same Ω_Λ spring as the scene: yaw ±φ³°, pitch ±φ²°.
+   Points are projected in JS onto a full-screen canvas, in 5 depth bands (one stroke each). */
+const SP=$('sph'),SX=SP.getContext('2d',{alpha:!0}),SCAM=1/F,SNEAR=.08,SB=5;
+let spW=0,spH=0,spR=1,spYaw=0,spKey='',spT=0;
+const SPL=[];                                                      // the grid as polylines of unit vectors
+for(let m=0;m<24;m++){const o=m*M.PI/12,L=[];for(let k=0;k<=72;k++){const t=-M.PI/2+k*M.PI/72;L.push([M.cos(t)*M.sin(o),M.sin(t),M.cos(t)*M.cos(o)])}SPL.push(L)}
+for(let p=-5;p<=5;p++){const t=p*M.PI/12,L=[];for(let k=0;k<=144;k++){const o=k*M.PI/72;L.push([M.cos(t)*M.sin(o),M.sin(t),M.cos(t)*M.cos(o)])}SPL.push(L)}
+function spSize(){spR=1;   // 1 px per CSS px: at this faintness retina sharpness can't be seen, and it's 4× fewer pixels
+ spW=SP.width=innerWidth*spR|0;spH=SP.height=innerHeight*spR|0;spKey=''}
+spSize();addEventListener('resize',spSize);
+function sphere(dt){
+ if(!still.matches)spYaw+=dt*2*M.PI/F**10;
+ const RX=innerWidth*.05,yaw=spYaw-PN.x/RX*F**3*M.PI/180,pit=PN.y/RX*F*F*F*M.PI/180,key=n(yaw*1e3)+'|'+n(pit*1e3);
+ spT+=dt;if(key===spKey||spT<1/31)return;spKey=key;spT=0;          // at most 30 redraws a second (it moves slowly), only when it turned
+ const cy=M.cos(yaw),sy=M.sin(yaw),cp=M.cos(pit),sp=M.sin(pit),f=M.max(spW,spH)*.382,ox=spW/2,oy=spH/2,
+  B=Array.from({length:SB},()=>new Path2D()),zf=1+SCAM,zn=1-SCAM;
+ for(const L of SPL){let px=0,py=0,pz=-1;
+  for(const[x,y,z]of L){
+   const x1=x*cy+z*sy,z1=-x*sy+z*cy,y2=y*cp-z1*sp,z2=y*sp+z1*cp+SCAM;   // turn the globe, then step back
+   const X=ox+f*x1/z2,Y=oy-f*y2/z2;
+   if(z2>SNEAR&&pz>SNEAR){const P=B[M.min(SB-1,M.max(0,((z2+pz)/2-zn)/(zf-zn)*SB|0))];P.moveTo(px,py);P.lineTo(X,Y)}   // band by depth
+   px=X;py=Y;pz=z2}}
+ SX.clearRect(0,0,spW,spH);SX.lineWidth=spR;
+ for(let b=0;b<SB;b++){SX.strokeStyle=`rgba(255,255,255,${n((.13-b*.018)*1e3)/1e3})`;SX.stroke(B[b])}}
 addEventListener('pointermove',e=>{const RX=innerWidth*.05,RY=RX/F;
  PN.tx=-(e.clientX/innerWidth*2-1)*RX;PN.ty=-(e.clientY/innerHeight*2-1)*RY});
 document.addEventListener('pointerleave',()=>{PN.tx=PN.ty=0});
@@ -267,5 +294,5 @@ const still=matchMedia('(prefers-reduced-motion: reduce)');
  if(!still.matches)waves(dt);
  {const q=1-M.exp(-dt*6.47);TY.k+=(TY.tk-TY.k)*q;TY.dx+=(TY.tdx-TY.dx)*q;}     // star and text glide to their new size
  if(!still.matches)pan(dt);
- draw();requestAnimationFrame(loop)})(last);
+ sphere(dt);draw();requestAnimationFrame(loop)})(last);
 })();
