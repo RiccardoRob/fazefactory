@@ -3,7 +3,7 @@
    · own static files (i18n.json, icons, manifest): stale-while-revalidate, instant and quietly refreshed
    · Google Fonts: cache first (their files never change at a given URL)
    Bump VERSION whenever files change: the old cache is deleted on activation. */
-const VERSION = 'ff-astro-2';
+const VERSION = 'ff-astro-3';
 const CORE = [
   '/',
   '/i18n.json',
@@ -38,6 +38,8 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // `npm run dev` serves source files (/src, /@vite, /node_modules): never cache those, or edits seem not to work
+  if (/^\/(src|@|node_modules)\b/.test(url.pathname)) return;
 
   // the page itself
   if (req.mode === 'navigate') {

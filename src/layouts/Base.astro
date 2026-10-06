@@ -8,7 +8,8 @@ const {
   description = 'Fazefactory®, digital creative service. Est. 2014, Italy. The new site is shaping up.',
   lang = 'en'
 } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+// clean URL: /index.html -> /, /about.html -> /about (build.format 'file' adds .html at build time)
+const canonical = new URL(Astro.url.pathname.replace(/(\/index)?\.html$/, '').replace(/\/index$/, '') || '/', Astro.site);
 ---
 <!doctype html>
 <html lang={lang}>

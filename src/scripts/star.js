@@ -209,7 +209,7 @@ const HI={on:!1,t:0};
 function hiStop(){if(!HI.on)return;HI.on=!1;clearTimeout(HI.t);TYE.lang='';TYT.setAttribute('aria-live','polite')}
 function hiPick(L){for(const t of navigator.languages||[navigator.language]){
   const x=L.find(l=>l.lang===String(t||'').toLowerCase().split('-')[0]);if(x&&x.greeting)return x}
- return L.find(l=>l.lang==='en'&&l.greeting)||{lang:'en',greeting:'Hello'}}
+ return L.find(l=>l.lang==='en'&&l.greeting)||{lang:'en',greeting:'Hello!'}}
 function greet({lang,greeting}){if(TY.s)return;              // the visitor is already typing: stay quiet
  const ch=[...greeting],k=ch.length,at=(f,s)=>HI.t=setTimeout(f,s*1000);
  HI.on=!0;TYE.lang=lang;TYT.removeAttribute('aria-live');
