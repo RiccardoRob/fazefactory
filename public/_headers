@@ -22,5 +22,8 @@
 /i18n.json
   Cache-Control: public, max-age=3600
 
+/sky.json
+  Cache-Control: public, max-age=86400
+
 /serviceWorker.js
   Cache-Control: no-cache

@@ -54,35 +54,65 @@ addEventListener('resize',field);
    energy share of the universe (Planck 2018): just under critical, so it glides, overshoots a hair and settles. */
 const SN=$('sn'),PN={x:0,y:0,vx:0,vy:0,tx:0,ty:0},ZL=.685,WX=2.6,WY=2.6/F;
 
-/* ---- the sphere ----
-   We stand inside a sphere, set back from its centre by φ⁻¹ of its radius, with a wide lens (focal φ⁻² of the screen), so the far wall bends round
-   the star like a dome and sits well behind it. Its grid is a globe's: 24 meridians and 11 parallels,
-   one every 15°, so the half we face shows the page's 12 columns. Lines fade with distance (the far
-   wall is the faintest) and the globe turns slowly on its axis, once every φ¹⁰ s (about 2 minutes).
-   The pointer turns it too, on the same Ω_Λ spring as the scene: yaw ±φ³°, pitch ±φ²°.
-   Points are projected in JS onto a full-screen canvas, in 5 depth bands (one stroke each). */
-const SP=$('sph'),SX=SP.getContext('2d',{alpha:!0}),SCAM=1/F,SNEAR=.08,SB=5;
-let spW=0,spH=0,spR=1,spYaw=0,spKey='',spT=0;
-const SPL=[];                                                      // the grid as polylines of unit vectors
-for(let m=0;m<24;m++){const o=m*M.PI/12,L=[];for(let k=0;k<=72;k++){const t=-M.PI/2+k*M.PI/72;L.push([M.cos(t)*M.sin(o),M.sin(t),M.cos(t)*M.cos(o)])}SPL.push(L)}
-for(let p=-5;p<=5;p++){const t=p*M.PI/12,L=[];for(let k=0;k<=144;k++){const o=k*M.PI/72;L.push([M.cos(t)*M.sin(o),M.sin(t),M.cos(t)*M.cos(o)])}SPL.push(L)}
-function spSize(){spR=1;   // 1 px per CSS px: at this faintness retina sharpness can't be seen, and it's 4× fewer pixels
- spW=SP.width=innerWidth*spR|0;spH=SP.height=innerHeight*spR|0;spKey=''}
+/* ---- the sky over Milan ----
+   The ground is the celestial sphere as seen from Milan (45.46° N, 9.19° E) at this very moment: the
+   sky turns with the real sidereal time, one turn every 23 h 56 min. We face south, looking up 30°, set
+   back from the centre by φ⁻¹ of the radius with a wide lens (focal φ⁻² of the screen), so the far
+   wall bends round the star like a dome and sits well behind it.
+   · Grid: the astronomers' own. 24 hour circles of right ascension (one every 15°: the page's 12
+     columns on the half we face) and parallels of declination every 15°. They converge on the poles.
+   · Stars: the 1,627 brightest (Hipparcos, to magnitude 5, in /sky.json) at their true places, sized
+     and lit by magnitude (a soft halo round those brighter than 1.6), tinted by colour index. Those below Milan's horizon are dimmed.
+   · Expansion: as the star recedes (Hubble), the sphere grows with ln of its distance and its light
+     shifts to the red, the same redshift as the star's.
+   The pointer moves the camera (±φ⁻⁴ of the radius) and turns it (±φ²°), against the pointer, on the
+   same Ω_Λ spring as the scene: the near wall slides more than the far one, as in a real room.
+   Everything is projected in JS onto one full-screen canvas: every frame while it moves, otherwise only
+   when the sky has turned (every few seconds). Lines go in 5 depth bands, stars in 50 light buckets. */
+const SP=$('sph'),SX=SP.getContext('2d'),D=M.PI/180,SCAM=1/F,SPAR=F**-4,SNEAR=.08,SB=5,
+ LAT=45.4642*D,LON=9.19,ALT0=30*D,sL=M.sin(LAT),cL=M.cos(LAT),sA=M.sin(ALT0),cA=M.cos(ALT0),
+ // star look by magnitude (≤1, ≤2, ≤3, ≤4, ≤5) and colour by B−V (blue-white … orange)
+ SMA=[1,.9,.72,.52,.36],SCO=[[200,215,255],[235,240,255],[255,250,240],[255,232,205],[255,208,165]];
+let spW=0,spH=0,spKey='',spLST=-9,SKY=[],SKG=[],SKS=null;
+fetch('/sky.json').then(r=>r.json()).then(j=>{SKY=j.stars;spLST=-9}).catch(()=>{});
+// equatorial (ra, dec) → camera frame [x right (west), y up, z forward (south, raised 30°)] + altitude sine
+function eq2cam(ra,de,lst){const H=lst-ra,cd=M.cos(de),X=cd*M.cos(H),Y=cd*M.sin(H),Z=M.sin(de),
+ s=X*sL-Z*cL,zen=X*cL+Z*sL;return[Y,-s*sA+zen*cA,s*cA+zen*sA,zen]}
+function skyBuild(lst){
+ const line=(N,f)=>{const L=new Float32Array((N+1)*3);for(let k=0;k<=N;k++){const[ra,de]=f(k/N),v=eq2cam(ra,de,lst);L[k*3]=v[0];L[k*3+1]=v[1];L[k*3+2]=v[2]}return L};
+ SKG=[];
+ for(let h=0;h<24;h++)SKG.push(line(72,t=>[h*15*D,(t*180-90)*D]));                  // hour circles
+ for(let d=-75;d<=75;d+=15)SKG.push(line(144,t=>[t*2*M.PI,d*D]));                    // parallels
+ const N=SKY.length/4;SKS=new Float32Array(N*5);
+ for(let i=0;i<N;i++){const v=eq2cam(SKY[i*4]/10*D,SKY[i*4+1]/10*D,lst),m=SKY[i*4+2]/10,bv=SKY[i*4+3]/10;
+  SKS[i*5]=v[0];SKS[i*5+1]=v[1];SKS[i*5+2]=v[2];SKS[i*5+4]=.62+M.max(0,3.3-m)*.55;   // radius: Sirius 3.2 px … faint .62
+  SKS[i*5+3]=(v[3]<0?25:0)+M.min(4,M.max(0,bv<0?0:bv<.3?1:bv<.6?2:bv<1?3:4))*5+M.min(4,M.max(0,M.ceil(m)-1))}}   // light bucket
+function spSize(){SP.width=spW=innerWidth;SP.height=spH=innerHeight;spKey=''}   // 1 px per CSS px: at this faintness retina can't tell
 spSize();addEventListener('resize',spSize);
 function sphere(dt){
- if(!still.matches)spYaw+=dt*2*M.PI/F**10;
- const RX=innerWidth*.05,yaw=spYaw-PN.x/RX*F**3*M.PI/180,pit=PN.y/RX*F*F*F*M.PI/180,key=n(yaw*1e3)+'|'+n(pit*1e3);
- spT+=dt;if(key===spKey||spT<1/31)return;spKey=key;spT=0;          // at most 30 redraws a second (it moves slowly), only when it turned
- const cy=M.cos(yaw),sy=M.sin(yaw),cp=M.cos(pit),sp=M.sin(pit),f=M.max(spW,spH)*.382,ox=spW/2,oy=spH/2,
-  B=Array.from({length:SB},()=>new Path2D()),zf=1+SCAM,zn=1-SCAM;
- for(const L of SPL){let px=0,py=0,pz=-1;
-  for(const[x,y,z]of L){
-   const x1=x*cy+z*sy,z1=-x*sy+z*cy,y2=y*cp-z1*sp,z2=y*sp+z1*cp+SCAM;   // turn the globe, then step back
-   const X=ox+f*x1/z2,Y=oy-f*y2/z2;
-   if(z2>SNEAR&&pz>SNEAR){const P=B[M.min(SB-1,M.max(0,((z2+pz)/2-zn)/(zf-zn)*SB|0))];P.moveTo(px,py);P.lineTo(X,Y)}   // band by depth
-   px=X;py=Y;pz=z2}}
- SX.clearRect(0,0,spW,spH);SX.lineWidth=spR;
- for(let b=0;b<SB;b++){SX.strokeStyle=`rgba(255,255,255,${n((.13-b*.018)*1e3)/1e3})`;SX.stroke(B[b])}}
+ // local sidereal time in Milan (radians), from the Julian date
+ const lst=((280.46061837+360.98564736629*(Date.now()/864e5+2440587.5-2451545)+LON)%360)*D;
+ if(M.abs(lst-spLST)>2e-4){spLST=lst;skyBuild(lst);spKey=''}      // about every 3 s of real sky
+ const RX=innerWidth*.05,ux=PN.x/RX,uy=PN.y/RX,camX=-ux*SPAR,camY=uy*SPAR,yaw=ux*F*F*D,pit=uy*F*F*D,
+  R=1+M.log(M.max(1,S.z))/F/F,rk=1-1/M.max(1,S.z),                  // expansion and redshift, from the star's distance
+  key=n(yaw*1e3)+'|'+n(pit*1e3)+'|'+n(camX*1e3)+'|'+n(camY*1e3)+'|'+n(R*1e3)+'|'+spLST;
+ if(key===spKey)return;spKey=key;
+ const cy=M.cos(yaw),sy=M.sin(yaw),cp=M.cos(pit),sp=M.sin(pit),f=M.max(spW,spH)*.382,ox=spW/2,oy=spH/2,zn=R-SCAM,zf=R+SCAM;
+ let X=0,Y=0,Z=0;
+ const P=(x,y,z)=>{const x1=x*cy+z*sy,z1=-x*sy+z*cy;Z=(y*sp+z1*cp)*R+SCAM;X=ox+f*(x1*R-camX)/Z;Y=oy-f*((y*cp-z1*sp)*R-camY)/Z},
+  path=L=>{let px=0,py=0,pz=-1;for(let k=0;k<L.length;k+=3){P(L[k],L[k+1],L[k+2]);
+   if(Z>SNEAR&&pz>SNEAR){const Q=B[M.min(SB-1,M.max(0,((Z+pz)/2-zn)/(zf-zn)*SB|0))];Q.moveTo(px,py);Q.lineTo(X,Y)}px=X;py=Y;pz=Z}},
+  rs=c=>c.map((v,i)=>n(v+([255,96,80][i]-v)*rk*.7)|0).join(','),   // redshift: toward a deep red
+  B=Array.from({length:SB},()=>new Path2D()),ST=Array.from({length:50},()=>new Path2D()),GL=new Path2D();
+ for(const L of SKG)path(L);
+ if(SKS)for(let i=0;i<SKS.length;i+=5){P(SKS[i],SKS[i+1],SKS[i+2]);
+  if(Z<SNEAR||X<-4||Y<-4||X>spW+4||Y>spH+4)continue;
+  const b=SKS[i+3],r=SKS[i+4],Q=ST[b];Q.moveTo(X+r,Y);Q.arc(X,Y,r,0,2*M.PI);
+  if(r>1.9&&b<25){GL.moveTo(X+r*3.2,Y);GL.arc(X,Y,r*3.2,0,2*M.PI)}}                 // a soft halo round the brightest
+ SX.clearRect(0,0,spW,spH);SX.lineWidth=1;const lc=rs([255,255,255]);
+ for(let b=0;b<SB;b++){SX.strokeStyle=`rgba(${lc},${n((.13-b*.018)*1e3)/1e3})`;SX.stroke(B[b])}
+ SX.fillStyle=`rgba(${rs([235,240,255])},.07)`;SX.fill(GL);
+ for(let b=0;b<50;b++){SX.fillStyle=`rgba(${rs(SCO[(b%25)/5|0])},${n(SMA[b%5]*(b<25?1:.35)*1e3)/1e3})`;SX.fill(ST[b])}}
 addEventListener('pointermove',e=>{const RX=innerWidth*.05,RY=RX/F;
  PN.tx=-(e.clientX/innerWidth*2-1)*RX;PN.ty=-(e.clientY/innerHeight*2-1)*RY});
 document.addEventListener('pointerleave',()=>{PN.tx=PN.ty=0});
@@ -148,7 +178,17 @@ function ticks(){SH=M.min(.873,dur/(F**3+1/F));LEN.style.strokeDasharray=SH+' 1'
 const W=new Map(),set=(el,k,v)=>{const id=el.id+k+(el.dataset.i||'');if(W.get(id)!==v){W.set(id,v);el.setAttribute(k,v)}},
  n=v=>M.round(v*100)/100,E=['s0','s1','s2','lg','r0','r1','w0','w1'].map($);
 U.forEach((L,j)=>L.forEach((e,i)=>e.dataset.i=j+'_'+i));
-const BG=$('bg').getContext('2d');
+const BG=$('bg').getContext('2d');BG.scale(2,2);                 // 96 px canvas, drawn in the 48 px units below
+/* the cosmic microwave background: the faint mottling of the oldest light, as mapped by Planck (where h and
+   Ω_Λ come from). Smooth value noise in 4 octaves, made once, laid over the ground in soft-light. */
+const CMB=document.createElement('canvas');CMB.width=CMB.height=96;
+{const c=CMB.getContext('2d'),im=c.createImageData(96,96),A=[];let s=20141;const rnd=()=>(s=s*16807%2147483647)/2147483647;
+ for(let o=0;o<4;o++){const g=4<<o,v=[];for(let i=0;i<(g+1)*(g+1);i++)v.push(rnd()*2-1);A.push([g,v])}
+ for(let y=0;y<96;y++)for(let x=0;x<96;x++){let t=0,w=1;
+  for(const[g,v]of A){const fx=x/96*g,fy=y/96*g,i=fx|0,j=fy|0,u=sm(fx-i),q=sm(fy-j),k=j*(g+1)+i;
+   t+=w*((v[k]*(1-u)+v[k+1]*u)*(1-q)+(v[k+g+1]*(1-u)+v[k+g+2]*u)*q);w*=.55}
+  const p=(y*96+x)*4;im.data[p]=im.data[p+1]=im.data[p+2]=128+M.max(-127,M.min(127,t*90));im.data[p+3]=255}
+ c.putImageData(im,0,0)}
 function draw(){
  const r=cur=='Rest'?{}:FX[cur].f(el);
  C.forEach(([x,y],i)=>{const m=G[i],t=`translate(${n(m.x)} ${n(m.y)}) rotate(${n(m.r)} ${x} ${y})`;U.forEach(L=>set(L[i],'transform',t))});
@@ -180,7 +220,8 @@ function draw(){
  TXR.style.strokeDasharray=n(M.max(.001,pt)*1e3)/1e3+' 1';TXR.style.stroke=c1;
  // ground: the mark's gradient inverted, as deep shades of the same hues (never a complement)
  const A2=(315-an)*M.PI/180,dx=M.sin(A2)*34,dy=-M.cos(A2)*34,gr=BG.createLinearGradient(24-dx,24-dy,24+dx,24+dy);
- gr.addColorStop(0,rgb([.3,.11,w2[2]]));gr.addColorStop(1,rgb([.24,.09,w0[2]]));BG.fillStyle=gr;BG.fillRect(0,0,48,48)}
+ gr.addColorStop(0,rgb([.3,.11,w2[2]]));gr.addColorStop(1,rgb([.24,.09,w0[2]]));BG.fillStyle=gr;BG.fillRect(0,0,48,48);
+ BG.globalCompositeOperation='soft-light';BG.globalAlpha=.3;BG.drawImage(CMB,0,0,48,48);BG.globalCompositeOperation='source-over';BG.globalAlpha=1}
 
 $('yr').textContent=new Date().getFullYear();   // copyright year keeps itself current
 // label + headline in many languages, read from i18n.json (lang, label, two headline lines).

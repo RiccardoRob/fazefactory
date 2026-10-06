@@ -3,10 +3,11 @@
    · own static files (i18n.json, icons, manifest): stale-while-revalidate, instant and quietly refreshed
    · Google Fonts: cache first (their files never change at a given URL)
    Bump VERSION whenever files change: the old cache is deleted on activation. */
-const VERSION = 'ff-astro-3';
+const VERSION = 'ff-astro-4';
 const CORE = [
   '/',
   '/i18n.json',
+  '/sky.json',
   '/favicon.svg',
   '/manifest.json',
   '/icons/icon-192.png',
