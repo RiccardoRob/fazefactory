@@ -18,6 +18,12 @@ html,body{height:100%}
 /* caret: a touch taller than the capitals (+12%), centred on them, rounded ends, set a little off the last letter */
 #cr{display:inline-block;width:.068em;height:calc(var(--cap)*1.12em);margin-left:.11em;border-radius:.034em;background:#fff;vertical-align:calc(var(--cap)*-.06em);opacity:0}
 #ty.on #cr{animation:blink 1.06s steps(1) infinite}
+/* the greeting in Chinese, Japanese or Korean uses the same system faces as the headline */
+#ty:lang(zh){font-family:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif}
+#ty:lang(ja){font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif}
+#ty:lang(ko){font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+/* their full-height glyphs are drawn at .82 so they sit between the same guides as the Latin capitals */
+#ty:lang(zh) #tyt,#ty:lang(ja) #tyt,#ty:lang(ko) #tyt{font-size:.82em}
 @keyframes blink{0%{opacity:1}50%{opacity:0}}
 #tr{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;contain:strict}
 #tr g{fill:none;stroke:url(#lg);stroke-width:1.2;opacity:0}

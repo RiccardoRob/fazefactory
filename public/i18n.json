@@ -5,6 +5,7 @@
     {
       "lang": "en",
       "name": "English",
+      "greeting": "Hello",
       "label": "Revamping · Heave-ho!",
       "headline": [
         "Back in",
@@ -14,6 +15,7 @@
     {
       "lang": "it",
       "name": "Italiano",
+      "greeting": "Ciao",
       "label": "Rinnovamento · Oh issa!",
       "headline": [
         "Torniamo",
@@ -23,6 +25,7 @@
     {
       "lang": "es",
       "name": "Español",
+      "greeting": "Hola",
       "label": "Renovación · ¡Arriba!",
       "headline": [
         "Volvemos",
@@ -32,6 +35,7 @@
     {
       "lang": "fr",
       "name": "Français",
+      "greeting": "Bonjour",
       "label": "Refonte · Allez, hop !",
       "headline": [
         "De retour",
@@ -41,6 +45,7 @@
     {
       "lang": "de",
       "name": "Deutsch",
+      "greeting": "Hallo",
       "label": "Relaunch · Hau ruck!",
       "headline": [
         "Wieder",
@@ -50,6 +55,7 @@
     {
       "lang": "nl",
       "name": "Nederlands",
+      "greeting": "Hallo",
       "label": "Vernieuwing · Hup!",
       "headline": [
         "Weer in",
@@ -59,6 +65,7 @@
     {
       "lang": "fi",
       "name": "Suomi",
+      "greeting": "Hei",
       "label": "Uudistus · Hiio hoi!",
       "headline": [
         "Takaisin",
@@ -68,6 +75,7 @@
     {
       "lang": "ru",
       "name": "Русский",
+      "greeting": "Привет",
       "label": "Обновление · Раз-два, взяли!",
       "headline": [
         "Снова",
@@ -77,6 +85,7 @@
     {
       "lang": "zh",
       "name": "中文",
+      "greeting": "你好",
       "label": "焕新 · 加油！",
       "headline": [
         "重新",
@@ -86,6 +95,7 @@
     {
       "lang": "ko",
       "name": "한국어",
+      "greeting": "안녕하세요",
       "label": "리뉴얼 · 영차!",
       "headline": [
         "제 모습",
@@ -95,6 +105,7 @@
     {
       "lang": "ja",
       "name": "日本語",
+      "greeting": "こんにちは",
       "label": "リニューアル · よいしょ！",
       "headline": [
         "カタチ、",

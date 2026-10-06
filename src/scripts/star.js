@@ -160,12 +160,12 @@ $('yr').textContent=new Date().getFullYear();   // copyright year keeps itself c
 // The label is "revamping" in that language plus its heave-ho; the headline plays on "back in shape".
 // A random pair fades in every `interval` s, never the same twice in a row. If the file can't be
 // loaded, the page simply stays in English.
-const HB=$('hb'),LB=$('lb'),HLE=$('hl');
-fetch('/i18n.json').then(r=>r.json()).then(({languages:L,interval:iv=F**3,fade:fd=.618})=>{
+const HB=$('hb'),LB=$('lb'),HLE=$('hl'),I18N=fetch('/i18n.json').then(r=>r.json()).catch(()=>({}));
+I18N.then(({languages:L,interval:iv=F**3,fade:fd=.618})=>{
  if(!L||L.length<2)return;HB.style.setProperty('--fd',fd+'s');let hi=0;
  (function swap(){setTimeout(()=>{HB.classList.add('out');setTimeout(()=>{let j;do j=M.random()*L.length|0;while(j==hi);hi=j;
   const x=L[j];HB.lang=x.lang;LB.textContent=x.label;HLE.replaceChildren(x.headline[0],document.createElement('br'),x.headline[1]||'');
-  HB.classList.remove('out');swap()},fd*1000)},iv*1000)})()}).catch(()=>{});
+  HB.classList.remove('out');swap()},fd*1000)},iv*1000)})()});
 field();ticks();
 /* ---- type to the star ----
    Typing on the keyboard writes white letters beside the star, in the headline face, with capitals half
@@ -173,25 +173,53 @@ field();ticks();
    fits the 79% field; the line stays centred and follows the star wherever it goes.
    Backspace deletes, Escape clears. */
 const TYE=$('ty'),TYC=document.createElement('canvas').getContext('2d'),TY={s:'',k:1,dx:0,tk:1,tdx:0,cap:.72};
+const TYF='Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif',TYL={zh:'"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",',
+ ja:'"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",',ko:'"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",'};
 function tyLayout(){
- TYC.font='500 100px Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif';
+ TYC.font='500 100px '+TYF;                                                            // guides always come from Archivo's capitals
  const mH=TYC.measureText('H'),fa=mH.fontBoundingBoxAscent||92,fd=mH.fontBoundingBoxDescent||24;
  TY.cap=(mH.actualBoundingBoxAscent||72)/100;
- TY.lb=TY.s?(TYC.measureText(TY.s[0]).actualBoundingBoxLeft||0)/100:0;                // side bearing of the first letter                                          // cap height, per px of size
+ const cj=TYL[TYE.lang]?.82:1;if(cj<1)TYC.font='500 100px '+TYL[TYE.lang]+TYF;                             // width in the face actually shown
+ TY.lb=TY.s?(TYC.measureText(TY.s[0]).actualBoundingBoxLeft||0)/100*cj:0;                // side bearing of the first letter                                          // cap height, per px of size
  TY.bl=(1-(fa+fd)/100)/2+fa/100;                                                       // baseline from the top of a line-height:1 box
  TYE.style.setProperty('--cap',TY.cap);
- const f=STH/2/TY.cap,tw=TY.s?(TYC.measureText(TY.s).width/100+.18)*f:0,gap=TY.s?STH/4:0,full=STW+gap+tw;
+ const f=STH/2/TY.cap,tw=TY.s?(TYC.measureText(TY.s).width/100*cj+.18)*f:0,gap=TY.s?STH/4:0,full=STW+gap+tw;
  TY.tk=M.min(1,innerWidth*.79/full);TY.tdx=-(gap+tw)/2*TY.tk}
 // characters typed with AltGr / Option (@ # [ ] € … on Italian and other layouts) arrive with Alt, or
 // Ctrl+Alt on Windows: those are let through; only real shortcuts (Cmd, or Ctrl without Alt) are left alone.
-addEventListener('keydown',e=>{if(e.metaKey||(e.ctrlKey&&!e.altKey&&!e.getModifierState('AltGraph')))return;
- if(e.key==='Escape')TY.s='';else if(e.key==='Backspace')TY.s=TY.s.slice(0,-1);
- else if(e.key.length===1&&TY.s.length<48)TY.s+=e.key;else return;
- e.preventDefault();$('tyt').textContent=TY.s;tyLayout();
+const TYT=$('tyt');
+function tyShow(s){TY.s=s;TYT.textContent=s;tyLayout();
  // caret: shown and restarted on every key, hidden when the line is empty or after φ² s without typing
  TYE.classList.remove('on');clearTimeout(TY.t);
- if(TY.s){void TYE.offsetWidth;TYE.classList.add('on');TY.t=setTimeout(()=>TYE.classList.remove('on'),F*F*1000)}});
+ if(s){void TYE.offsetWidth;TYE.classList.add('on');TY.t=setTimeout(()=>TYE.classList.remove('on'),F*F*1000)}}
+addEventListener('keydown',e=>{if(e.metaKey||(e.ctrlKey&&!e.altKey&&!e.getModifierState('AltGraph')))return;
+ let s=HI.on?'':TY.s;                                   // the visitor's first key replaces the greeting
+ if(e.key==='Escape')s='';else if(e.key==='Backspace')s=s.slice(0,-1);
+ else if(e.key.length===1&&s.length<48)s+=e.key;else return;
+ e.preventDefault();hiStop();tyShow(s)});
 addEventListener('resize',()=>setTimeout(tyLayout));document.fonts&&document.fonts.ready.then(tyLayout);   // re-measure once Archivo has loaded
+
+/* ---- greeting ----
+   On arrival the star says hello in the browser's language, typed beside it like a visitor would:
+   letters land every φ⁻⁴–φ⁻² s (0.146–0.382 s, a human rhythm), the word rests φ³ s, then backspaces away
+   at φ⁻⁵ s a letter. The first languages in the browser's list are tried in order, by their base code
+   (it-IT → it); none of the 11 → English. Any key takes the line over at once. Reduced motion: the
+   word simply appears and leaves. Screen readers are spared the letter-by-letter typing. */
+const HI={on:!1,t:0};
+function hiStop(){if(!HI.on)return;HI.on=!1;clearTimeout(HI.t);TYE.lang='';TYT.setAttribute('aria-live','polite')}
+function hiPick(L){for(const t of navigator.languages||[navigator.language]){
+  const x=L.find(l=>l.lang===String(t||'').toLowerCase().split('-')[0]);if(x&&x.greeting)return x}
+ return L.find(l=>l.lang==='en'&&l.greeting)||{lang:'en',greeting:'Hello'}}
+function greet({lang,greeting}){if(TY.s)return;              // the visitor is already typing: stay quiet
+ const ch=[...greeting],k=ch.length,at=(f,s)=>HI.t=setTimeout(f,s*1000);
+ HI.on=!0;TYE.lang=lang;TYT.removeAttribute('aria-live');
+ const end=()=>{hiStop();tyShow('')};
+ if(still.matches){tyShow(greeting);at(end,F**4);return}
+ let i=0;
+ (function type(){if(i<k){tyShow(ch.slice(0,++i).join(''));at(type,F**-4+M.random()*(F**-2-F**-4))}
+  else at(function erase(){if(--i>0){tyShow(ch.slice(0,i).join(''));at(erase,F**-5)}else end()},F**3)})()}
+Promise.all([I18N,document.fonts?document.fonts.ready:0]).then(([{languages:L=[]}])=>{
+ const x=hiPick(L);setTimeout(()=>greet(x),F*1000)});    // after φ s, once the page has settled
 
 /* ---- live favicon ----
    The Fazefactory F, painted with the star's own gradient as it moves round the RYB wheel (entangled:
