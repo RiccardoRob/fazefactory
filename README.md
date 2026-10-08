@@ -66,7 +66,7 @@ wrangler.jsonc             configurazione del Worker
 
 ## 7. Tailwind
 
-- I token del brand sono in `src/styles/global.css` (`@theme`): `bg-ground`, `text-ink`, `text-mute`, `font-archivo`, `p-u` (8px)…
+- I token del brand sono in `src/styles/global.css` (`@theme`): `bg-ground`, `text-ink`, `text-mute`, `font-host`, `p-u` (8px)…
 - Preflight (il reset di Tailwind) è spento per non toccare la pagina attuale. Per le sezioni nuove si potrà accendere (vedi il commento nel file).
 - Esempio d'uso: `src/pages/404.astro`.
 

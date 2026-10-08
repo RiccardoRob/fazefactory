@@ -7,7 +7,17 @@
 /* the star's engine is plain JS: don't scan it for class names */
 @source not "../scripts";
 
-/* The brand as Tailwind tokens: usable as bg-ink, text-mute, font-archivo, p-u (8px) ... */
+/* The one typeface: Host Grotesk (SIL Open Font License, public/fonts/OFL.txt), served from this site.
+   A variable font: every weight from 300 to 800 in one file per alphabet; Latin first, Latin Extended on demand. */
+@font-face{font-family:"Host Grotesk";font-style:normal;font-weight:300 800;font-display:swap;
+  src:url(/fonts/host-grotesk-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Host Grotesk";font-style:normal;font-weight:300 800;font-display:swap;
+  src:url(/fonts/host-grotesk-latin-ext.woff2) format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+:root{--font:"Host Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif}
+
+/* The brand as Tailwind tokens: usable as bg-ink, text-mute, font-host, p-u (8px) ... */
 @theme {
   --color-ink: #FAFAF7;
   --color-mute: rgb(250 250 247 / .62);
@@ -15,6 +25,41 @@
   --color-wine: #3A1418;
   --color-ryb-red: #E3242B;
   --color-ryb-yellow: #F6C700;
-  --font-archivo: "Archivo", system-ui, sans-serif;
+  --font-host: "Host Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --spacing-u: 8px;
 }
+
+/* ---- .fx: the one button of the site ----
+   At rest only the white icon. On hover / focus a pill opens round it, no fill, a 4px white stroke outside
+   the button, and the label fades in beside the icon, which never moves. Each pill fits its own label.
+   Timing on the golden scale: the pill opens in φ⁻¹ s (0.618) on a long ease-out, the label fades in over
+   φ⁻² s after φ⁻⁴ s. Only transform and opacity animate, so the graphics card does it alone (no layout, no repaint).
+   The pill is three pieces: two half-ring caps (one slides out) and a band between them that grows with
+   scaleX (which keeps the stroke thickness intact). The label only fades: one animation less.
+   Open, the whole pill is part of the button, so the pointer can rest on the words.
+   Size: --d diameter, --t stroke, --i icon, --x reach = label width + 8px (measured by src/scripts/fx.js).
+   .fx-e opens to the right. In a .fx-row the buttons before the open one slide aside by its reach (--sx). */
+.fx{--d:48px;--t:4px;--i:22px;--x:88px;--e:cubic-bezier(.16,1,.3,1);--s:.618s;
+  position:relative;flex:none;box-sizing:border-box;width:var(--d);height:var(--d);margin:0;padding:0;border:0;
+  display:grid;place-items:center;background:none;color:#fff;cursor:pointer;text-decoration:none;outline:0;
+  -webkit-tap-highlight-color:transparent}
+.fx>svg{width:var(--i);height:var(--i);display:block;fill:currentColor}
+.fx-p{position:absolute;inset:0;pointer-events:none}
+.fx-p i{position:absolute;top:calc(-1 * var(--t));height:calc(var(--d) + 2 * var(--t));box-sizing:border-box;
+  border:var(--t) solid #fff;opacity:0;transition:transform var(--s) var(--e),opacity .236s linear}
+.fx-p i:nth-child(1){left:calc(-1 * var(--t));width:calc(var(--d) / 2 + var(--t));border-right:0;border-radius:999px 0 0 999px}
+.fx-p i:nth-child(2){left:calc(var(--d) / 2 - var(--x) - 1px);width:calc(var(--x) + 2px);border-left:0;border-right:0;
+  transform:scaleX(0);transform-origin:100% 50%}
+.fx-p i:nth-child(3){left:calc(var(--d) / 2);width:calc(var(--d) / 2 + var(--t));border-left:0;border-radius:0 999px 999px 0}
+.fx-t{position:absolute;top:50%;right:calc(var(--d) / 2 + var(--i) / 2 + 8px);transform:translateY(-50%);
+  white-space:nowrap;pointer-events:none;font:500 15px/1 var(--font);letter-spacing:-.01em;color:#fff;
+  opacity:0;transition:opacity .236s linear}
+.fx:hover .fx-p i,.fx:focus-visible .fx-p i{opacity:1;pointer-events:auto}
+.fx:hover .fx-p i:nth-child(1),.fx:focus-visible .fx-p i:nth-child(1){transform:translateX(calc(-1 * var(--x)))}
+.fx:hover .fx-p i:nth-child(2),.fx:focus-visible .fx-p i:nth-child(2){transform:none}
+.fx:hover .fx-t,.fx:focus-visible .fx-t{opacity:1;pointer-events:auto;transition:opacity .382s linear .146s}
+.fx-e .fx-p{transform:scaleX(-1)}
+.fx-e .fx-t{right:auto;left:calc(var(--d) / 2 + var(--i) / 2 + 8px)}
+.fx-row .fx{transition:transform var(--s) var(--e)}
+.fx-row .fx:has(~ .fx:hover,~ .fx:focus-visible){transform:translateX(calc(-1 * (var(--sx,88px) + var(--t))))}
+@media (prefers-reduced-motion:reduce){.fx *,.fx-row .fx{transition:none!important}}

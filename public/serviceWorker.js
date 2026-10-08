@@ -1,13 +1,14 @@
 /* Fazefactory® service worker
    · the page (navigation): network first, so a new version is seen at once; the cached copy only when offline
    · own static files (i18n.json, icons, manifest): stale-while-revalidate, instant and quietly refreshed
-   · Google Fonts: cache first (their files never change at a given URL)
+   · the font (Host Grotesk) is local: cached with the other files
    Bump VERSION whenever files change: the old cache is deleted on activation. */
-const VERSION = 'ff-astro-4';
+const VERSION = 'ff-astro-6';
 const CORE = [
   '/',
   '/i18n.json',
   '/sky.json',
+  '/fonts/host-grotesk-latin.woff2',
   '/favicon.svg',
   '/manifest.json',
   '/icons/icon-192.png',
@@ -47,12 +48,6 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       fetch(req).then(res => put('/', res)).catch(() => caches.match('/'))
     );
-    return;
-  }
-
-  // Google Fonts
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => put(req, res))));
     return;
   }
 

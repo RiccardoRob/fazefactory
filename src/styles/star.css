@@ -6,11 +6,9 @@ html,body{height:100%}
    grid floats in front of it; with preserve-3d the far layer moves less than the near one (parallax).
    Each layer is scaled up by (perspective + depth) / perspective so it still fills the screen, plus a margin
    for the pan. Only the scene's transform changes per frame, so the work stays on the compositor. */
-#sc{position:fixed;inset:0;z-index:-2;perspective:900px;overflow:hidden;pointer-events:none;background:#2A1A10}
-#sn{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
-#bg{position:absolute;inset:0;width:100%;height:100%;transform:translateZ(-1500px) scale(3.6)}
+#sc{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:#0B0B0E}
 /* the sphere: its grid is projected in JS (true 3D), so it sits outside the CSS-transformed scene */
-#sph{position:absolute;inset:0;width:100%;height:100%}
+#sph{position:absolute;left:-6%;top:-6%;width:112%;height:112%;will-change:transform}
 /* waves the star emits: outline copies of the mark, in its own gradient, on a layer behind it */
 /* the typed line uses the face's own spacing and kerning pairs, untouched */
 #ty{position:fixed;left:0;top:0;transform-origin:0 0;--cap:.72;color:#fff;font-weight:500;line-height:1;letter-spacing:0;font-kerning:normal;font-feature-settings:'kern' 1,'liga' 1;text-rendering:optimizeLegibility;white-space:pre;pointer-events:none;will-change:transform}
@@ -25,16 +23,17 @@ html,body{height:100%}
 /* their full-height glyphs are drawn at .82 so they sit between the same guides as the Latin capitals */
 #ty:lang(zh) #tyt,#ty:lang(ja) #tyt,#ty:lang(ko) #tyt{font-size:.82em}
 @keyframes blink{0%{opacity:1}50%{opacity:0}}
+#wv{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}   /* the waves, on the graphics card */
 #tr{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;contain:strict}
 #tr g{fill:none;stroke:url(#lg);stroke-width:1.2;opacity:0}
-body{background:#2A1A10;color:var(--ink);font:500 13px/1.35 Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden}
+body{background:#0B0B0E;color:var(--ink);font:500 13px/1.35 var(--font);overflow:hidden}
 main{height:100%;box-sizing:border-box;padding:var(--g);display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:auto 1fr auto auto auto;column-gap:var(--g)}
 /* bottom-left column on an 8 px baseline: label, headline, indicators, footer — 1u and 3u steps */
 .ft{grid-area:5/1/6/13;margin-top:calc(var(--u)*3);color:#fff}
 .ft span{text-transform:none}
 /* the four corners: each pair shares a row and sits on that row's vertical centre */
 .tl{grid-area:1/1/2/7;display:flex;align-items:center;gap:12px;align-self:center}
-.tr{grid-area:1/7/2/13;display:flex;align-items:center;justify-content:flex-end;gap:16px;align-self:center}
+.tr{grid-area:1/7/2/13;display:flex;align-items:center;justify-content:flex-end;gap:var(--u);align-self:center}
 .bl{grid-area:3/1/4/8}
 .br{grid-area:4/1/5/8;margin-top:calc(var(--u)*3)}
 .mark{grid-area:2/1/3/13;display:grid;place-items:center;min-height:0}
@@ -50,13 +49,9 @@ main{height:100%;box-sizing:border-box;padding:var(--g);display:grid;grid-templa
 .t{font-size:12px;font-weight:500;line-height:1.4;text-transform:uppercase;letter-spacing:.08em}
 .l{color:var(--mute)}
 .t sup{font-size:.62em;letter-spacing:0}
-.ct{width:44px;height:44px;display:grid;place-items:center;color:#fff;transition:transform .382s;flex:none;outline:0}
-.ct:hover,.ct:focus-visible{transform:translateY(-2px)}
-.ct:focus-visible svg{filter:drop-shadow(0 0 3px #fff)}
-.ct svg{width:30px;height:30px;fill:currentColor}
+/* top-right buttons: the shared .fx button (src/styles/global.css) */
 h1{margin:var(--u) 0 0;font-size:clamp(28px,4.4vw,56px);font-weight:500;line-height:1;letter-spacing:-.03em;min-height:2em;transition:opacity var(--fd,.618s) cubic-bezier(.4,0,.2,1)}
-/* scripts Archivo doesn't cover fall back to each system's own well-made face */
-#hb:lang(ru) h1{font-family:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif}
+/* scripts Host Grotesk doesn't cover (Cyrillic, CJK) fall back to each system's own well-made face */
 #hb:lang(zh) h1{font-family:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;letter-spacing:0}
 #hb:lang(ja) h1{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;letter-spacing:0}
 #hb:lang(ko) h1{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;letter-spacing:-.01em}

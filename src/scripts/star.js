@@ -52,7 +52,7 @@ addEventListener('resize',field);
    The scene pans the opposite way to the pointer: wider and quicker across (horizontal), shorter and slower
    up and down (vertical), in the ratio φ. It follows on a spring whose damping ratio is Ω_Λ = 0.685, the dark
    energy share of the universe (Planck 2018): just under critical, so it glides, overshoots a hair and settles. */
-const SN=$('sn'),PN={x:0,y:0,vx:0,vy:0,tx:0,ty:0},ZL=.685,WX=2.6,WY=2.6/F;
+const PN={x:0,y:0,vx:0,vy:0,tx:0,ty:0},ZL=.685,WX=2.6,WY=2.6/F;
 
 /* ---- the sky over Milan ----
    The ground is the celestial sphere as seen from Milan (45.46° N, 9.19° E) at this very moment: the
@@ -65,8 +65,8 @@ const SN=$('sn'),PN={x:0,y:0,vx:0,vy:0,tx:0,ty:0},ZL=.685,WX=2.6,WY=2.6/F;
      and lit by magnitude (a soft halo round those brighter than 1.6), tinted by colour index. Those below Milan's horizon are dimmed.
    · Expansion: as the star recedes (Hubble), the sphere grows with ln of its distance and its light
      shifts to the red, the same redshift as the star's.
-   The pointer moves the camera (±φ⁻⁴ of the radius) and turns it (±φ²°), against the pointer, on the
-   same Ω_Λ spring as the scene: the near wall slides more than the far one, as in a real room.
+   The pointer slides the whole sky against it, on the same Ω_Λ spring as the scene, as a compositor transform
+   of a canvas drawn 12% larger than the screen: no redraw while the pointer moves, so it costs nothing.
    Everything is projected in JS onto one full-screen canvas: every frame while it moves, otherwise only
    when the sky has turned (every few seconds). Lines go in 5 depth bands, stars in 50 light buckets. */
 const SP=$('sph'),SX=SP.getContext('2d'),D=M.PI/180,SCAM=1/F,SPAR=F**-4,SNEAR=.08,SB=5,
@@ -87,17 +87,19 @@ function skyBuild(lst){
  for(let i=0;i<N;i++){const v=eq2cam(SKY[i*4]/10*D,SKY[i*4+1]/10*D,lst),m=SKY[i*4+2]/10,bv=SKY[i*4+3]/10;
   SKS[i*5]=v[0];SKS[i*5+1]=v[1];SKS[i*5+2]=v[2];SKS[i*5+4]=.62+M.max(0,3.3-m)*.55;   // radius: Sirius 3.2 px … faint .62
   SKS[i*5+3]=(v[3]<0?25:0)+M.min(4,M.max(0,bv<0?0:bv<.3?1:bv<.6?2:bv<1?3:4))*5+M.min(4,M.max(0,M.ceil(m)-1))}}   // light bucket
-function spSize(){SP.width=spW=innerWidth;SP.height=spH=innerHeight;spKey=''}   // 1 px per CSS px: at this faintness retina can't tell
+// the canvas is 12% larger than the screen (6% margin all round) so the pointer can slide it without showing an edge
+function spSize(){SP.width=spW=innerWidth*1.12|0;SP.height=spH=innerHeight*1.12|0;spKey=''}   // 1 px per CSS px: at this faintness retina can't tell
 spSize();addEventListener('resize',spSize);
 function sphere(dt){
  // local sidereal time in Milan (radians), from the Julian date
  const lst=((280.46061837+360.98564736629*(Date.now()/864e5+2440587.5-2451545)+LON)%360)*D;
  if(M.abs(lst-spLST)>2e-4){spLST=lst;skyBuild(lst);spKey=''}      // about every 3 s of real sky
- const RX=innerWidth*.05,ux=PN.x/RX,uy=PN.y/RX,camX=-ux*SPAR,camY=uy*SPAR,yaw=ux*F*F*D,pit=uy*F*F*D,
-  R=1+M.log(M.max(1,S.z))/F/F,rk=1-1/M.max(1,S.z),                  // expansion and redshift, from the star's distance
-  key=n(yaw*1e3)+'|'+n(pit*1e3)+'|'+n(camX*1e3)+'|'+n(camY*1e3)+'|'+n(R*1e3)+'|'+spLST;
+ // the pointer no longer re-projects the sky: the canvas is drawn once and slid by the compositor (see pan()).
+ // It is redrawn only when the sky turns (every few seconds), on resize, or while the star recedes (expansion).
+ const camX=0,camY=0,yaw=0,pit=0,R=1+M.log(M.max(1,S.z))/F/F,rk=1-1/M.max(1,S.z),   // expansion and redshift, from the star's distance
+  key=n(R*1e3)+'|'+spLST;
  if(key===spKey)return;spKey=key;
- const cy=M.cos(yaw),sy=M.sin(yaw),cp=M.cos(pit),sp=M.sin(pit),f=M.max(spW,spH)*.382,ox=spW/2,oy=spH/2,zn=R-SCAM,zf=R+SCAM;
+ const cy=M.cos(yaw),sy=M.sin(yaw),cp=M.cos(pit),sp=M.sin(pit),f=M.max(innerWidth,innerHeight)*.382,ox=spW/2,oy=spH/2,zn=R-SCAM,zf=R+SCAM;
  let X=0,Y=0,Z=0;
  const P=(x,y,z)=>{const x1=x*cy+z*sy,z1=-x*sy+z*cy;Z=(y*sp+z1*cp)*R+SCAM;X=ox+f*(x1*R-camX)/Z;Y=oy-f*((y*cp-z1*sp)*R-camY)/Z},
   path=L=>{let px=0,py=0,pz=-1;for(let k=0;k<L.length;k+=3){P(L[k],L[k+1],L[k+2]);
@@ -119,8 +121,8 @@ document.addEventListener('pointerleave',()=>{PN.tx=PN.ty=0});
 function pan(dt){
  PN.vx+=(WX*WX*(PN.tx-PN.x)-2*ZL*WX*PN.vx)*dt;PN.x+=PN.vx*dt;
  PN.vy+=(WY*WY*(PN.ty-PN.y)-2*ZL*WY*PN.vy)*dt;PN.y+=PN.vy*dt;
- const RX=innerWidth*.05,t=`translate3d(${n(PN.x)}px,${n(PN.y)}px,0) rotateY(${n(PN.x/RX*3)}deg) rotateX(${n(-PN.y/RX*F*2)}deg)`;
- if(W.get('pan')!==t){W.set('pan',t);SN.style.transform=t}}
+ const t=`translate3d(${n(PN.x*.6)}px,${n(PN.y*.6)}px,0)`;     // the sky slides against the pointer
+ if(W.get('pan')!==t){W.set('pan',t);SP.style.transform=t}}
 
 let ptr=null,last=performance.now(),ct=0,cur='Rest',dur=1,el=0,lastC='';
 function next(){if(cur!='Rest'){cur='Rest';dur=.618+M.random()*F}
@@ -178,17 +180,9 @@ function ticks(){SH=M.min(.873,dur/(F**3+1/F));LEN.style.strokeDasharray=SH+' 1'
 const W=new Map(),set=(el,k,v)=>{const id=el.id+k+(el.dataset.i||'');if(W.get(id)!==v){W.set(id,v);el.setAttribute(k,v)}},
  n=v=>M.round(v*100)/100,E=['s0','s1','s2','lg','r0','r1','w0','w1'].map($);
 U.forEach((L,j)=>L.forEach((e,i)=>e.dataset.i=j+'_'+i));
-const BG=$('bg').getContext('2d');BG.scale(2,2);                 // 96 px canvas, drawn in the 48 px units below
-/* the cosmic microwave background: the faint mottling of the oldest light, as mapped by Planck (where h and
-   Ω_Λ come from). Smooth value noise in 4 octaves, made once, laid over the ground in soft-light. */
-const CMB=document.createElement('canvas');CMB.width=CMB.height=96;
-{const c=CMB.getContext('2d'),im=c.createImageData(96,96),A=[];let s=20141;const rnd=()=>(s=s*16807%2147483647)/2147483647;
- for(let o=0;o<4;o++){const g=4<<o,v=[];for(let i=0;i<(g+1)*(g+1);i++)v.push(rnd()*2-1);A.push([g,v])}
- for(let y=0;y<96;y++)for(let x=0;x<96;x++){let t=0,w=1;
-  for(const[g,v]of A){const fx=x/96*g,fy=y/96*g,i=fx|0,j=fy|0,u=sm(fx-i),q=sm(fy-j),k=j*(g+1)+i;
-   t+=w*((v[k]*(1-u)+v[k+1]*u)*(1-q)+(v[k+g+1]*(1-u)+v[k+g+2]*u)*q);w*=.55}
-  const p=(y*96+x)*4;im.data[p]=im.data[p+1]=im.data[p+2]=128+M.max(-127,M.min(127,t*90));im.data[p+3]=255}
- c.putImageData(im,0,0)}
+// the ground is a plain dark field: no gradient recomputed every frame. The waves are drawn on the graphics
+// card (src/scripts/wavesgl.js) when WebGL2 is there, in SVG otherwise.
+const GLW=window.FF_WAVES,f3=c=>c.match(/\d+/g).map(v=>v/255);
 function draw(){
  const r=cur=='Rest'?{}:FX[cur].f(el);
  C.forEach(([x,y],i)=>{const m=G[i],t=`translate(${n(m.x)} ${n(m.y)}) rotate(${n(m.r)} ${x} ${y})`;U.forEach(L=>set(L[i],'transform',t))});
@@ -218,10 +212,7 @@ function draw(){
  const pc=((ct/CY)%1),pt=(p%1);
  CYR.style.strokeDasharray=n(M.max(.001,pc)*1e3)/1e3+' 1';
  TXR.style.strokeDasharray=n(M.max(.001,pt)*1e3)/1e3+' 1';TXR.style.stroke=c1;
- // ground: the mark's gradient inverted, as deep shades of the same hues (never a complement)
- const A2=(315-an)*M.PI/180,dx=M.sin(A2)*34,dy=-M.cos(A2)*34,gr=BG.createLinearGradient(24-dx,24-dy,24+dx,24+dy);
- gr.addColorStop(0,rgb([.3,.11,w2[2]]));gr.addColorStop(1,rgb([.24,.09,w0[2]]));BG.fillStyle=gr;BG.fillRect(0,0,48,48);
- BG.globalCompositeOperation='soft-light';BG.globalAlpha=.3;BG.drawImage(CMB,0,0,48,48);BG.globalCompositeOperation='source-over';BG.globalAlpha=1}
+ if(GLW)GLW.colors(f3(c0),f3(c1),f3(c2),an)}
 
 $('yr').textContent=new Date().getFullYear();   // copyright year keeps itself current
 // label + headline in many languages, read from i18n.json (lang, label, two headline lines).
@@ -241,10 +232,10 @@ field();ticks();
    fits the 79% field; the line stays centred and follows the star wherever it goes.
    Backspace deletes, Escape clears. */
 const TYE=$('ty'),TYC=document.createElement('canvas').getContext('2d'),TY={s:'',k:1,dx:0,tk:1,tdx:0,cap:.72};
-const TYF='Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif',TYL={zh:'"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",',
+const TYF='"Host Grotesk","Helvetica Neue",Helvetica,Arial,sans-serif',TYL={zh:'"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",',
  ja:'"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",',ko:'"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",'};
 function tyLayout(){
- TYC.font='500 100px '+TYF;                                                            // guides always come from Archivo's capitals
+ TYC.font='500 100px '+TYF;                                                            // guides always come from Host Grotesk's capitals
  const mH=TYC.measureText('H'),fa=mH.fontBoundingBoxAscent||92,fd=mH.fontBoundingBoxDescent||24;
  TY.cap=(mH.actualBoundingBoxAscent||72)/100;
  const cj=TYL[TYE.lang]?.82:1;if(cj<1)TYC.font='500 100px '+TYL[TYE.lang]+TYF;                             // width in the face actually shown
@@ -261,11 +252,12 @@ function tyShow(s){TY.s=s;TYT.textContent=s;tyLayout();
  TYE.classList.remove('on');clearTimeout(TY.t);
  if(s){void TYE.offsetWidth;TYE.classList.add('on');TY.t=setTimeout(()=>TYE.classList.remove('on'),F*F*1000)}}
 addEventListener('keydown',e=>{if(e.metaKey||(e.ctrlKey&&!e.altKey&&!e.getModifierState('AltGraph')))return;
+ if(e.target.closest&&e.target.closest('#ck,button,a,input,textarea,select'))return;   // keys meant for a control (cookie panel, links) aren't typed
  let s=HI.on?'':TY.s;                                   // the visitor's first key replaces the greeting
  if(e.key==='Escape')s='';else if(e.key==='Backspace')s=s.slice(0,-1);
  else if(e.key.length===1&&s.length<48)s+=e.key;else return;
  e.preventDefault();hiStop();tyShow(s)});
-addEventListener('resize',()=>setTimeout(tyLayout));document.fonts&&document.fonts.ready.then(tyLayout);   // re-measure once Archivo has loaded
+addEventListener('resize',()=>setTimeout(tyLayout));document.fonts&&document.fonts.ready.then(tyLayout);   // re-measure once Host Grotesk has loaded
 
 /* ---- greeting ----
    On arrival the star says hello in the browser's language, typed beside it like a visitor would:
@@ -289,16 +281,7 @@ function greet({lang,greeting}){if(TY.s)return;              // the visitor is a
 Promise.all([I18N,document.fonts?document.fonts.ready:0]).then(([{languages:L=[]}])=>{
  const x=hiPick(L);setTimeout(()=>greet(x),F*1000)});    // after φ s, once the page has settled
 
-/* ---- live favicon ----
-   The Fazefactory F, painted with the star's own gradient as it moves round the RYB wheel (entangled:
-   same colours, same moment). Redrawn 4 times a second, only when the colour changed.
-   favicon.svg carries the same transition for browsers without the page. */
-const FC=document.createElement('canvas'),FX2=FC.getContext('2d'),FAV=$('fav'),FF=new Path2D('M94.3,483.6V28c0-5.1,4.2-9.3,9.3-9.3h304.1c5.1,0,9.3,4.2,9.3,9.3v78.4c0,5.1-4.2,9.3-9.3,9.3H224.1 c-5.1,0-9.3,4.2-9.3,9.3v89.6c0,5.1,4.2,9.3,9.3,9.3h165.1c5.1,0,9.3,4.2,9.3,9.3v73.8c0,5.1-4.2,9.3-9.3,9.3H224.1 c-5.1,0-9.3,4.2-9.3,9.3v158.2c0,5.1-4.2,9.3-9.3,9.3H103.5C98.4,492.9,94.3,488.7,94.3,483.6z');
-FC.width=FC.height=64;let favK='';
-setInterval(()=>{const p=3*ct/CY,a=rgb(red(wheel(p),S.z)),c=rgb(red(wheel(p+.8),S.z)),k=a+c;if(k===favK)return;favK=k;
- FX2.clearRect(0,0,64,64);FX2.save();FX2.scale(64/476,64/476);FX2.translate(-18,-18);   // F bbox, centred in a 476 square
- const gr=FX2.createLinearGradient(94,0,418,0);gr.addColorStop(0,a);gr.addColorStop(1,c);FX2.fillStyle=gr;
- FX2.fill(FF);FX2.restore();FAV.type='image/png';FAV.href=FC.toDataURL('image/png')},250);
+/* favicon: the Fazefactory star (public/favicon.svg), static; the live F favicon has been retired */
 
 /* ---- waves ----
    Like a pulsar, the star sends out its own shape as a thin outline.
@@ -307,11 +290,12 @@ setInterval(()=>{const p=3*ct/CY,a=rgb(red(wheel(p),S.z)),c=rgb(red(wheel(p+.8),
    · In motion (flight, bounce, recede, return, orbit): an echo whenever the star has moved, scaled or
      turned enough since the last one, at most 30 a second. Echoes barely widen and fade in φ s, so the
      trail traces the star's real path. While dragging, echoes are spaced wider (that already reads well).
+   Drawn by the graphics card (wavesgl.js): the page itself is not touched for them.
    Every wave keeps the exact position, size and tilt the star had when it left. */
 const TR=$('tr'),WV=[],NS='http://www.w3.org/2000/svg',VIS={x:0,y:0,s:1,r:0};
-for(let i=0;i<16;i++){const g=document.createElementNS(NS,'g');
- for(let j=0;j<6;j++){const u=document.createElementNS(NS,'use');u.setAttribute('href','#p'+j);g.appendChild(u)}
- TR.appendChild(g);WV.push({g,t:-1})}
+for(let i=0;i<16;i++){let g=null;                                // SVG copies only as a fallback without WebGL2
+ if(!GLW){g=document.createElementNS(NS,'g');for(let j=0;j<6;j++){const u=document.createElementNS(NS,'use');u.setAttribute('href','#p'+j);g.appendChild(u)}TR.appendChild(g)}
+ WV.push({g,t:-1})}
 let wk=0,wg=0,wl={x:0,y:0,s:1,r:0};
 function emit(kind){const w=WV.reduce((a,b)=>b.t<0?b:a.t<0?a:b.t>a.t?b:a);
  Object.assign(w,{t:0,x:home[0]+VIS.x,y:home[1]+VIS.y,s:KS*VIS.s,r:VIS.r,
@@ -321,11 +305,14 @@ function waves(dt){
  const moved=M.hypot(VIS.x-wl.x,VIS.y-wl.y)+M.abs(VIS.s-wl.s)*KS*260+M.abs(VIS.r-wl.r)*1.6;
  if(moved>(S.drag?110:26)&&wg>1/30){emit(1);wk=0;wg=0}
  else if(wk>.236&&!S.drag){emit(2);wk=0;wg=0}
+ const L=[];
  for(const w of WV){if(w.t<0)continue;w.t+=dt/w.life;
-  if(w.t>=1){w.t=-1;w.g.style.opacity=0;continue}
-  const e=1-(1-w.t)**3;                                  // eases out: fast at first, then drifting
-  w.g.setAttribute('transform',`translate(${n(w.x)} ${n(w.y)}) scale(${n(w.s*(1+w.grow*e)*1e3)/1e3}) rotate(${n(w.r)}) translate(-255 -257.5)`);
-  w.g.style.opacity=n(w.op*(1-w.t)**1.5*1e3)/1e3}}
+  if(w.t>=1){w.t=-1;if(w.g)w.g.style.opacity=0;continue}
+  const e=1-(1-w.t)**3,sc=w.s*(1+w.grow*e),op=w.op*(1-w.t)**1.5;   // eases out: fast at first, then drifting
+  if(GLW){L.push(w.x,w.y,sc,w.r,op);continue}
+  w.g.setAttribute('transform',`translate(${n(w.x)} ${n(w.y)}) scale(${n(sc*1e3)/1e3}) rotate(${n(w.r)}) translate(-255 -257.5)`);
+  w.g.style.opacity=n(op*1e3)/1e3}
+ if(GLW)GLW.draw(L)}
 
 const still=matchMedia('(prefers-reduced-motion: reduce)');
 (function loop(now){

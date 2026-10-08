@@ -1,6 +1,7 @@
 ---
-// Shared <head> for every page: charset, viewport, fonts, PWA, favicon.
+// Shared <head> for every page: charset, viewport, font (local), PWA, favicon.
 import '../styles/global.css';
+import CookiePanel from '../components/CookiePanel.astro';
 
 interface Props { title?: string; description?: string; lang?: string }
 const {
@@ -23,11 +24,14 @@ const canonical = new URL(Astro.url.pathname.replace(/(\/index)?\.html$/, '').re
   <link rel="manifest" href="/manifest.json">
   <link id="fav" rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500&display=swap">
+  <link rel="preload" href="/fonts/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <script src="/registerServiceWorker.js" defer is:inline></script>
 </head>
 <body>
   <slot />
+  <CookiePanel />
+  <script>
+    import "../scripts/fx.js";
+  </script>
 </body>
 </html>

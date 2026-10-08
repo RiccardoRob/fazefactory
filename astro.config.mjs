@@ -12,5 +12,6 @@ export default defineConfig({
   // URLs without extension and without trailing slash: /about, not /about.html or /about/
   trailingSlash: 'never',
   build: { format: 'file' },
-  vite: { plugins: [tailwindcss()] }
+  // assetsInlineLimit 0: never inline small scripts into the page; the CSP only allows script files from 'self'
+  vite: { plugins: [tailwindcss()], build: { assetsInlineLimit: 0 } }
 });

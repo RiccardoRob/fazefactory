@@ -1,0 +1,55 @@
+# Fazefactory® — Riccardo Roberto
+
+> Fazefactory® is the independent advisory practice of Riccardo Roberto, a senior marketing, brand and communication executive with more than 20 years of experience across global brands, regulated B2B markets and digital transformation. Based between Milan (Italy) and Lugano (Switzerland), working internationally. Fazefactory® was established in Italy in 2014.
+
+Riccardo Roberto advises companies on how their brand is built, found, chosen and measured. He combines senior marketing leadership with hands-on command of digital platforms, search, data and automation, and a product design background from Politecnico di Milano that lets him follow an offer from concept to market. He works side by side with CEOs, chairmen and R&D and regulatory leads, and is used to running the full marketing function on his own.
+
+## Practice areas
+
+1. **Brand Leadership** — Brand strategy, positioning and equity management for companies operating across many markets. Brand architecture and governance, budget ownership, strategic partnerships, events, and fractional or interim leadership of the marketing function at executive level.
+2. **Digital Presence** — Direction of the complete digital ecosystem: corporate and product platforms, content architecture, user experience and the infrastructure behind them, from strategy and specification to delivery and continuous improvement.
+3. **Visibility & Demand** — How a brand is found and chosen: search engine optimisation (SEO), generative engine optimisation for AI assistants and answer engines (GEO), search and paid media (SEM), content and social programmes, lead generation and sales enablement for B2B pipelines.
+4. **Market Intelligence** — Competitive intelligence, market and category analysis, and KPI frameworks that turn data into decisions. Experienced with syndicated sources such as NielsenIQ, IQVIA, Mintel and Circana.
+5. **Marketing Systems & AI** — Design and integration of CRM, marketing automation and analytics, and the adoption of AI tools in marketing workflows to raise output, speed and return on investment.
+6. **Product & Design Innovation** — An industrial design background applied to product development: concept visualisation, user-centred design, prototyping and the path to industrialisation, aligned with brand and go-to-market.
+
+## Selected results
+
+- Global brand management for Bioseutica Group across 86 countries, 2019 to present, running the whole marketing function: brand, digital platforms, search and paid media, competitive intelligence, lead generation, sales enablement and events.
+- 40% annual growth in brand awareness and sales, driven by multi-channel programmes, competitive intelligence and data-led decisions.
+- Contribution to a 114% increase in sales and a 30% rise in annual EBITDA at Bioseutica Group.
+- 30% increase in lead generation for Healiva SA, a Swiss regenerative-medicine start-up (marketing advisor, 2020 to 2022).
+- More than 30% revenue growth delivered for agency clients at Leo Burnett (Publicis Groupe), including Philip Morris, Lavazza, Stellantis, Renault, LG, Sky, Ferragamo, Furla and TIM; 25% gain in campaign delivery efficiency for the digital team he led.
+
+## Experience
+
+- **Global Brand Manager**, Bioseutica Group, Lugano — 2019 to present
+- **Marketing Advisor**, Healiva SA, Lugano — 2020 to 2022
+- **Digital Marketing Manager**, Bioseutica Group, Lugano — 2013 to 2019
+- **Digital Media Supervisor**, Leo Burnett, Publicis Groupe, Milan — 2006 to 2011
+- **Master's Degree in Industrial Design**, Politecnico di Milano — 2000 to 2005
+
+## Sectors
+
+Life sciences (B2B, regulated markets); healthtech and regenerative medicine; consumer brands in food and beverage, automotive, fashion, telecommunications, media and consumer electronics.
+
+## Tools
+
+- Marketing and analytics: Google Marketing Platform, Google Analytics, Google Ads, Meta Business Suite, LinkedIn Campaign Manager, Semrush
+- CRM and automation: HubSpot, Salesforce, Veeva
+- Market intelligence: NielsenIQ, IQVIA, Mintel, Circana, UL Prospector, Zauba
+- Platforms and code: Drupal, WordPress, React, Next.js, JavaScript, PHP, Python, HTML, CSS, JSON, XML
+- Design and AI: Adobe Creative Suite, Figma, CAD and 3D modelling, video editing; ChatGPT, Claude, Midjourney
+
+## Languages
+
+Italian (native), English (full professional proficiency), Mandarin Chinese (intermediate), German (beginner).
+
+## Contact
+
+- [Email](mailto:info@fazefactory.com?subject=Information%20request%20%E2%80%93%20fazefactory.com): consulting enquiries, in Italian or English
+- [LinkedIn](https://www.linkedin.com/in/riccardor): professional profile
+
+## Site
+
+- [Home](https://fazefactory.com/): fazefactory.com, currently being rebuilt; the practice areas above will each have their own page
